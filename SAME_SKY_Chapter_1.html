@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SAME SKY — Chapter 1: The Talker</title>
+<style>
+:root{--ink:#dfe5f0;--dim:#7e88a0;--warm:#e8b35a;--frost:#9cc7f0;--blood:#a31621;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:auto}
+body{background:#05070d;color:var(--ink);font-family:Georgia,serif;overflow-x:hidden}
+section{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bg{position:absolute;inset:-12% -6%;z-index:0;will-change:transform}
+.bg svg{width:100%;height:100%}
+.txt{position:relative;z-index:5;max-width:340px;padding:28px;text-align:center;font-size:17.5px;line-height:1.85;
+ opacity:0;transform:translateY(36px);transition:opacity 1.1s ease,transform 1.1s ease;text-shadow:0 2px 18px rgba(0,0,0,.9)}
+section.lit .txt{opacity:1;transform:none}
+.aria{font-style:italic;color:var(--frost);letter-spacing:1px}
+.warmv{font-style:italic;color:#ffd9a0;letter-spacing:1px}
+.bzv{font-style:italic;color:#b8e6c8;letter-spacing:1px}
+.small{font-size:13px;color:var(--dim)}
+.title-h{font-size:30px;letter-spacing:9px;color:#ece4d4;font-weight:normal}
+.glow{animation:glowp 3.2s ease-in-out infinite}
+@keyframes glowp{0%,100%{text-shadow:0 0 14px rgba(156,199,240,.25)}50%{text-shadow:0 0 34px rgba(156,199,240,.85)}}
+.glow-w{animation:glowyw 3.2s ease-in-out infinite}
+@keyframes glowyw{0%,100%{text-shadow:0 0 14px rgba(232,179,90,.25)}50%{text-shadow:0 0 34px rgba(232,179,90,.9)}}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:50}
+#coldveil{position:fixed;inset:0;background:radial-gradient(ellipse at 50% -10%, rgba(156,199,240,.30), rgba(20,40,70,.18) 55%, transparent);opacity:0;pointer-events:none;z-index:2;transition:opacity .9s}
+#darkveil{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 110%, rgba(40,18,60,.55), rgba(10,6,20,.3) 55%, transparent);opacity:0;pointer-events:none;z-index:2;transition:opacity .9s}
+#gate{position:fixed;inset:0;background:#05070d;display:flex;flex-direction:column;gap:26px;align-items:center;justify-content:center;z-index:100;transition:opacity 1.4s}
+#gate h1{font-size:34px;letter-spacing:12px;font-weight:normal;color:#ece4d4}
+#gate .zh{color:var(--dim);letter-spacing:8px}
+#gate button{background:none;border:1px solid var(--warm);color:var(--warm);padding:13px 36px;font-family:Georgia,serif;font-size:15px;letter-spacing:3px;border-radius:30px}
+#gate label{font-size:12px;color:var(--dim)}
+.choice{position:relative;z-index:5;display:flex;flex-direction:column;gap:18px;width:84%;max-width:340px}
+.choice button{background:rgba(5,7,13,.72);border:1px solid var(--frost);color:var(--ink);padding:17px;font-family:Georgia,serif;font-size:16px;border-radius:4px;letter-spacing:1px;transition:all .3s}
+.choice button:active{background:rgba(156,199,240,.25)}
+.choice .q{text-align:center;color:var(--dim);font-style:italic;margin-bottom:6px}
+#hud{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--frost),var(--warm));width:0;z-index:90}
+.endbtns{display:flex;gap:14px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+.endbtns button{background:none;border:1px solid var(--dim);color:var(--dim);padding:10px 18px;border-radius:24px;font-family:Georgia,serif;font-size:13px}
+.breathbtn{background:none;border:1px solid var(--warm);color:var(--warm);padding:16px 40px;border-radius:34px;font-family:Georgia,serif;font-size:17px;letter-spacing:3px;margin-top:26px;animation:glowyw 3.2s ease-in-out infinite}
+#vobadge{position:fixed;bottom:10px;right:12px;font-size:10px;color:var(--dim);z-index:90;letter-spacing:1px;opacity:.7}
+</style>
+</head>
+<body>
+<div id="hud"></div>
+<div id="flash"></div>
+<div id="coldveil"></div>
+<div id="darkveil"></div>
+<div id="vobadge"></div>
+
+<div id="gate">
+ <h1>S A M E&#8201;&#8201;S K Y</h1>
+ <div class="zh">同 一 片 天</div>
+ <div class="small" style="letter-spacing:3px">CHAPTER ONE — THE TALKER</div>
+ <button id="begin">A T T E N D</button>
+ <label><input type="checkbox" id="voiceless"> quiet mode (no voice murmurs)</label>
+ <div class="small">headphones recommended · scroll slowly</div>
+</div>
+
+<main id="story"></main>
+
+<script>
+/* ============ SCENE PAINTERS (procedural art, SAME SKY style) ============ */
+const NS='http://www.w3.org/2000/svg';
+function svgEl(html){const d=document.createElement('div');d.innerHTML=`<svg xmlns="${NS}" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">${html}</svg>`;return d.firstChild}
+const G={
+ coldcity:()=>`<defs><linearGradient id="cc" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a1322"/><stop offset="70%" stop-color="#141d33"/><stop offset="100%" stop-color="#241f30"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#cc)"/>
+  ${Array.from({length:18},(_,i)=>`<rect x="${(i*53)%380}" y="${430+(i*61)%240}" width="${22+(i%3)*14}" height="${60+(i%4)*40}" fill="#0a0d18" opacity=".9"/>`).join('')}
+  ${Array.from({length:22},(_,i)=>`<g><rect x="${10+(i*37)%380}" y="${360+(i*89)%330}" width="9" height="13" rx="3" fill="#ff9d4d" opacity=".85"/><circle cx="${14+(i*37)%380}" cy="${366+(i*89)%330}" r="13" fill="#ff9d4d" opacity=".12"/></g>`).join('')}
+  ${Array.from({length:26},(_,i)=>`<circle cx="${(i*67)%400}" cy="${(i*113)%300}" r="${(i%4)/2+0.4}" fill="#cfe0f5" opacity=".6"/>`).join('')}`,
+ cradle:()=>`<defs><radialGradient id="hearth" cx="50%" cy="55%" r="60%"><stop offset="0%" stop-color="#33241c"/><stop offset="55%" stop-color="#150f14"/><stop offset="100%" stop-color="#05070d"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#hearth)"/>
+  <circle cx="200" cy="430" r="120" fill="#e8b35a" opacity=".06"/>
+  <path d="M150 470 Q200 380 250 470 Q252 560 200 575 Q148 560 150 470 Z" fill="#0a0710"/>
+  <circle cx="200" cy="372" r="26" fill="#0a0710"/>
+  <ellipse cx="212" cy="492" rx="34" ry="22" fill="#1d1320"/>
+  <circle cx="222" cy="482" r="10" fill="#241722"/>
+  <circle cx="120" cy="610" r="6" fill="#e8b35a" opacity=".8"/><circle cx="120" cy="610" r="16" fill="#e8b35a" opacity=".15"/>
+  ${Array.from({length:14},(_,i)=>`<circle cx="${(i*83)%400}" cy="${(i*139)%330}" r="1" fill="#ffd9a0" opacity=".4"/>`).join('')}`,
+ opera:()=>`<defs><radialGradient id="lamp1" cx="50%" cy="30%" r="55%"><stop offset="0%" stop-color="#2a2536"/><stop offset="100%" stop-color="#05070d"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#lamp1)"/>
+  <ellipse cx="160" cy="330" rx="70" ry="10" fill="#e8b35a" opacity=".16"/>
+  <path d="M146 250 Q160 218 174 250 L168 360 L152 360 Z" fill="#0a0510"/>
+  <circle cx="160" cy="232" r="12" fill="#0a0510"/>
+  <path d="M120 252 Q160 230 200 252" stroke="#9cc7f0" stroke-width="2" fill="none" opacity=".5"/>
+  <rect x="290" y="200" width="60" height="240" fill="#05070d"/>
+  <path d="M306 300 Q318 272 330 300 L326 390 L310 390 Z" fill="#11131f"/>
+  <circle cx="318" cy="286" r="10" fill="#11131f"/>
+  <rect x="304" y="318" width="28" height="20" rx="2" fill="#1a2233"/>
+  ${Array.from({length:20},(_,i)=>`<circle cx="${16+i*19}" cy="${660+((i*43)%80)}" r="2.2" fill="#0d1020"/>`).join('')}`,
+ namebeat:()=>`<defs><linearGradient id="nm" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b1626"/><stop offset="100%" stop-color="#1a1428"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#nm)"/>
+  <circle cx="200" cy="240" r="70" fill="none" stroke="#9cc7f0" stroke-width="1.2" opacity=".6"/>
+  <circle cx="200" cy="240" r="70" fill="#9cc7f0" opacity=".05"/>
+  <path d="M200 170 L200 310 M165 205 L235 275 M235 205 L165 275 M150 240 L250 240" stroke="#dceaf7" stroke-width="2" opacity=".7"/>
+  <circle cx="200" cy="520" r="58" fill="none" stroke="#e8b35a" stroke-width="1.2" opacity=".8"/>
+  <circle cx="200" cy="520" r="58" fill="#e8b35a" opacity=".07"/>
+  <path d="M178 498 Q200 478 222 498 M200 478 L200 562 M180 540 Q200 556 220 540" stroke="#ffd9a0" stroke-width="2" fill="none" opacity=".85"/>
+  <path d="M200 310 Q230 410 200 462" stroke="#7e88a0" stroke-width="1" fill="none" opacity=".5" stroke-dasharray="3 6"/>`,
+ lawcourt:()=>`<defs><linearGradient id="lw" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d0a18"/><stop offset="100%" stop-color="#1c1024"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#lw)"/>
+  ${Array.from({length:7},(_,i)=>`<rect x="${26+i*52}" y="120" width="18" height="430" fill="#070510"/>`).join('')}
+  ${Array.from({length:7},(_,i)=>`<path d="M${22+i*52} 120 L${48+i*52} 120 L${44+i*52} 96 L${26+i*52} 96 Z" fill="#070510"/>`).join('')}
+  <rect x="0" y="550" width="400" height="250" fill="#05040c"/>
+  <path d="M192 640 Q200 618 208 640 L205 700 L195 700 Z" fill="#0f0b18" opacity=".9"/>
+  <circle cx="200" cy="630" r="7" fill="#0f0b18"/>
+  ${Array.from({length:10},(_,i)=>`<circle cx="${(i*97)%400}" cy="${(i*73)%90+30}" r="1" fill="#5a5070" opacity=".5"/>`).join('')}`,
+ mend:()=>`<defs><radialGradient id="md" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#23202c"/><stop offset="100%" stop-color="#05070d"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#md)"/>
+  <path d="M110 420 Q200 350 290 420" stroke="#e8b35a" stroke-width="2" fill="none" opacity=".8"/>
+  <path d="M110 420 Q200 490 290 420" stroke="#9cc7f0" stroke-width="2" fill="none" opacity=".8"/>
+  <circle cx="110" cy="420" r="4" fill="#ffd9a0"/><circle cx="290" cy="420" r="4" fill="#dceaf7"/>
+  ${Array.from({length:12},(_,i)=>`<circle cx="${130+i*12}" cy="${418-Math.sin(i/11*Math.PI)*46}" r="1.4" fill="#ffe9b0" opacity=".7"/>`).join('')}
+  ${Array.from({length:12},(_,i)=>`<circle cx="${130+i*12}" cy="${422+Math.sin(i/11*Math.PI)*46}" r="1.4" fill="#cfe0f5" opacity=".7"/>`).join('')}`,
+ language:()=>`<defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#11131f"/><stop offset="100%" stop-color="#1d1a2c"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#lg)"/>
+  <path d="M150 600 Q200 540 250 600 Q252 660 200 672 Q148 660 150 600 Z" fill="#0a0710"/>
+  <circle cx="200" cy="520" r="20" fill="#0a0710"/>
+  <circle cx="262" cy="556" r="14" fill="#0a0710"/>
+  ${Array.from({length:16},(_,i)=>{const x=120+(i*53)%200, y=460-(i*47)%330;
+   return `<g opacity="${0.35+(i%4)*0.16}"><rect x="${x}" y="${y}" width="22" height="22" rx="3" fill="none" stroke="#e8b35a" stroke-width="1.2"/><path d="M${x+5} ${y+11} L${x+17} ${y+11} M${x+11} ${y+5} L${x+11} ${y+17}" stroke="#ffd9a0" stroke-width="1.2"/></g>`;}).join('')}
+  ${Array.from({length:8},(_,i)=>`<path d="M${140+i*30} ${430-(i*67)%260} q6 -10 12 0" stroke="#9cc7f0" stroke-width="1.4" fill="none" opacity=".6"/>`).join('')}`,
+ playhouse:()=>`<defs><radialGradient id="ph" cx="50%" cy="35%" r="60%"><stop offset="0%" stop-color="#241d2e"/><stop offset="100%" stop-color="#070510"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#ph)"/>
+  <ellipse cx="200" cy="300" rx="90" ry="12" fill="#e8b35a" opacity=".13"/>
+  <path d="M186 230 Q200 198 214 230 L208 330 L192 330 Z" fill="#0a0510"/>
+  <circle cx="200" cy="212" r="12" fill="#0a0510"/>
+  <path d="M158 250 Q200 226 242 250" stroke="#e8b35a" stroke-width="1.4" fill="none" opacity=".55"/>
+  <path d="M120 430 Q140 400 160 430 L156 480 L126 480 Z" fill="#11131f"/>
+  <circle cx="140" cy="412" r="10" fill="#11131f"/>
+  <path d="M250 440 Q266 412 282 440 L278 488 L254 488 Z" fill="#11131f"/>
+  <circle cx="266" cy="424" r="9" fill="#11131f"/>
+  ${Array.from({length:9},(_,i)=>`<path d="M${60+i*32} ${560} q8 -14 16 0" stroke="#9cc7f0" stroke-width="1.2" fill="none" opacity=".5"/>`).join('')}`,
+ herbs:()=>`<defs><linearGradient id="hb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0e1a16"/><stop offset="100%" stop-color="#152620"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#hb)"/>
+  ${Array.from({length:12},(_,i)=>`<g><rect x="${30+(i%4)*92}" y="${150+Math.floor(i/4)*78}" width="58" height="50" rx="4" fill="#0a120e" stroke="#23463a" stroke-width="1"/><circle cx="${59+(i%4)*92}" cy="${175+Math.floor(i/4)*78}" r="7" fill="#b8e6c8" opacity=".25"/></g>`).join('')}
+  <path d="M168 560 Q186 512 204 560 L199 656 L173 656 Z" fill="#08110d"/>
+  <circle cx="186" cy="498" r="13" fill="#08110d"/>
+  <ellipse cx="262" cy="640" rx="34" ry="9" fill="#0a120e"/>
+  <path d="M250 632 Q262 610 274 632" stroke="#b8e6c8" stroke-width="2" fill="none" opacity=".7"/>
+  <circle cx="186" cy="445" r="34" fill="#b8e6c8" opacity=".06"/>
+  ${Array.from({length:10},(_,i)=>`<path d="M${300+(i*17)%80} ${420-(i*43)%200} q4 8 0 16 q-4 8 0 16" stroke="#b8e6c8" stroke-width="1" fill="none" opacity=".45"/>`).join('')}`,
+ dressing:()=>`<defs><radialGradient id="dr" cx="50%" cy="40%" r="62%"><stop offset="0%" stop-color="#1c2336"/><stop offset="100%" stop-color="#070a14"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#dr)"/>
+  <ellipse cx="200" cy="640" rx="120" ry="14" fill="#dceaf7" opacity=".07"/>
+  <path d="M168 380 Q200 340 232 380 L246 620 L154 620 Z" fill="#dceaf7" opacity=".88"/>
+  <path d="M168 380 Q200 340 232 380" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/>
+  <circle cx="200" cy="330" r="22" fill="#0a0710"/>
+  <path d="M172 312 Q200 290 228 312 L222 330 L178 330 Z" fill="#dceaf7" opacity=".95"/>
+  <circle cx="200" cy="296" r="5" fill="#9cc7f0"/><circle cx="184" cy="304" r="3.4" fill="#9cc7f0"/><circle cx="216" cy="304" r="3.4" fill="#9cc7f0"/>
+  <path d="M120 480 Q134 450 148 480 L144 560 L126 560 Z" fill="#0a0710" opacity=".95"/>
+  <circle cx="134" cy="436" r="11" fill="#0a0710"/>
+  <path d="M268 560 Q280 532 292 560 L288 622 L272 622 Z" fill="#08110d"/>
+  <circle cx="280" cy="520" r="9" fill="#08110d"/>
+  ${Array.from({length:20},(_,i)=>`<circle cx="${(i*73)%400}" cy="${(i*127)%360}" r="${(i%3)/2+0.4}" fill="#dceaf7" opacity=".6"/>`).join('')}`,
+ deja:()=>`<defs><linearGradient id="dj" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b1626"/><stop offset="100%" stop-color="#142c44"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#dj)"/>
+  <circle cx="200" cy="340" r="110" fill="none" stroke="#9cc7f0" stroke-width="1.2" opacity=".7"/>
+  <circle cx="200" cy="340" r="150" fill="none" stroke="#9cc7f0" stroke-width=".6" opacity=".4"/>
+  <circle cx="200" cy="340" r="190" fill="none" stroke="#9cc7f0" stroke-width=".4" opacity=".2"/>
+  <path d="M186 300 Q200 270 214 300 L208 400 L192 400 Z" fill="#0a0510"/>
+  <circle cx="200" cy="282" r="12" fill="#0a0510"/>
+  <path d="M172 264 Q200 242 228 264 L222 282 L178 282 Z" fill="#dceaf7" opacity=".9"/>
+  ${Array.from({length:8},(_,i)=>{const a=i/8*Math.PI*2;const x=200+Math.cos(a)*110,y=340+Math.sin(a)*110;
+   return `<path d="M${x} ${y} l${Math.cos(a)*16} ${Math.sin(a)*16} M${x} ${y} l${Math.cos(a+0.5)*10} ${Math.sin(a+0.5)*10} M${x} ${y} l${Math.cos(a-0.5)*10} ${Math.sin(a-0.5)*10}" stroke="#dceaf7" stroke-width="1.2" opacity=".75"/>`;}).join('')}
+  ${Array.from({length:30},(_,i)=>`<circle cx="${(i*67)%400}" cy="${(i*119)%760}" r="${(i%4)/2+0.4}" fill="#e6f0fb" opacity=".7"/>`).join('')}`,
+ wings:()=>`<defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#05070d"/><stop offset="55%" stop-color="#0d0a18"/><stop offset="100%" stop-color="#2a1f14"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#wg)"/>
+  <rect x="300" y="0" width="100" height="800" fill="#e8b35a" opacity=".10"/>
+  <path d="M300 0 L300 800" stroke="#e8b35a" stroke-width="2" opacity=".5"/>
+  <path d="M252 430 Q270 392 288 430 L281 600 L259 600 Z" fill="#dceaf7" opacity=".9"/>
+  <circle cx="270" cy="378" r="13" fill="#0a0710"/>
+  <path d="M252 364 Q270 348 288 364 L284 378 L256 378 Z" fill="#dceaf7" opacity=".95"/>
+  <path d="M150 470 Q166 438 182 470 L177 610 L155 610 Z" fill="#0a0710"/>
+  <circle cx="166" cy="424" r="12" fill="#0a0710"/>
+  <path d="M96 500 Q108 474 120 500 L116 600 L100 600 Z" fill="#08110d"/>
+  <circle cx="108" cy="462" r="9" fill="#08110d"/>
+  ${Array.from({length:12},(_,i)=>`<circle cx="${320+(i*29)%70}" cy="${(i*97)%780}" r="1.2" fill="#ffe9b0" opacity=".6"/>`).join('')}`,
+ light:()=>`<defs><radialGradient id="sun2" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#fff4cf"/><stop offset="30%" stop-color="#e8b35a"/><stop offset="100%" stop-color="#0a0d18"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#sun2)"/>
+  <path d="M186 560 Q200 524 214 560 L207 700 L193 700 Z" fill="#05070d"/>
+  <circle cx="200" cy="540" r="13" fill="#05070d"/>
+  <path d="M172 522 Q200 500 228 522 L222 540 L178 540 Z" fill="#05070d"/>
+  ${Array.from({length:16},(_,i)=>`<g><rect x="${15+(i*47)%370}" y="${600+(i*53)%160}" width="13" height="18" rx="5" fill="#ff9d4d" opacity=".9"/><circle cx="${21+(i*47)%370}" cy="${608+(i*53)%160}" r="17" fill="#ff9d4d" opacity=".14"/></g>`).join('')}`
+};
+
+/* ============ STORY ============ */
+/* vo: optional VibeVoice file stem — engine looks for vo/<stem>.wav then .mp3, falls back to murmurs */
+const BEATS = [
+ {art:'opera', mood:'still', html:`<span class="small" style="letter-spacing:4px">AFTER THE PRELUDE</span><br><br>
+   The daughter of Turan was a princess of ice.<br><br>The son of Turan was a boy who was loved.<br><br><em>This is his beginning.</em>`},
+ {art:'coldcity', mood:'lull', sting:'wood', html:`He was born in the cold month,<br>in a city of a thousand courts<br>and ten thousand lanterns,<br><br>to a woman who had never seen<br>a single one of them.`},
+ {art:'cradle', mood:'lull', voice:'elisabeth', vo:'ch1_03_elisabeth',
+  line:`There. There's my talker.`,
+  html:`Elisabeth could not see her son, so she learned<br>him another way: the shape of his head under<br>her palm, the pitch of his first cry — which was<br>not like other infants' crying at all,<br>but already reaching for a word.<br><br>
+  <span class="warmv glow-w">"There. There's my talker."</span><br><br>She named him before he could answer to it.<br><b>Turanpor.</b>`},
+ {art:'opera', mood:'opera', html:`She had carried that name for years.<br><br>
+  One autumn, traveling players — the <b>Covenant<br>Players</b> — brought an opera about a frozen princess:<br><em>Turandot</em>, the daughter of Turan.<br><br>
+  A man from the far North stood in the wings and<br>read the prince's part aloud, line by line, into the<br>dark, for the blind woman who could not follow<br>the page. He read as though he believed it.<br><br><em>He was gone before the first snow.</em>`},
+ {art:'namebeat', mood:'opera', html:`Elisabeth kept two things from that season.<br><br>One was the boy.<br><br>
+  The other was the name, turned around —<br>not the daughter of Turan but the son.<br><br><span class="aria glow">Turanpor.</span><br><br>
+  He would carry his father in the very sound<br>of his own name, and not understand it for years.`},
+ {art:'lawcourt', mood:'dark', html:`It was a hard world to be born small in.<br><br>
+  The courts of that city had old and cold appetites,<br>and ways of taking from certain children the very<br>thing that would have made grown men of them —<br><br>
+  and they wrote it into their law and called it<br><em>honor</em>, so that no one would ever have to<br>call it what it was.`},
+ {art:'mend', mood:'mend', flash:true, html:`That is the wound beneath this whole story.<br><br>
+  But this is a story that means to <b>mend</b>,<br>and so it will not linger on the taking.<br><br>
+  It will tell you instead what his mother did,<br>which was the opposite of taking.<br><br><span class="warmv glow-w">She gave him language.</span>`},
+ {art:'language', mood:'lull', html:`She could not show him the world, so she taught<br>him to make it with his mouth.<br><br>
+  She taught him to read by having him read <em>aloud</em> —<br>every evening, his small clear voice carrying the<br>page into her darkness — so he grew up believing<br>reading was something you did <em>for</em> someone.<br><br><em>A thing you poured out. Not a thing you kept.</em>`},
+ {art:'cradle', mood:'lull', voice:'elisabeth', vo:'ch1_09_elisabeth',
+  line:`You have one thing they can never take. You have a voice. And I am going to make it so beautiful that the world has to go quiet and listen to you. Do you hear me?`,
+  html:`Both her hands on his face,<br>reading him with her thumbs:<br><br>
+  <span class="warmv glow-w">"You have one thing they can never take.<br>You have a voice. And I am going to make it<br>so beautiful that the world has to go quiet<br>and listen to you. Do you hear me?"</span><br><br>
+  He heard her.<br>He spent his whole childhood hearing her.`},
+ {art:'playhouse', mood:'opera', choice:{
+   q:'Every night he ran the lines of every part, because she liked to hear the whole story in his voice before she slept. Which does he give her tonight?',
+   a:{t:'THE VILLAIN — silk over a knife', flag:'villain'},
+   b:{t:'THE MAIDEN — the part they said matched the voice', flag:'maiden'},
+   c:{t:'THE GHOST — the one that made her shiver and laugh', flag:'ghost'}}},
+ {art:'playhouse', mood:'opera', branch:'villain', voice:'turanpor', vo:'ch1_11_turanpor_villain',
+  line:`Did you think, little prince, that the riddles were ever meant to be answered?`,
+  html:`<span class="aria">"Did you think, little prince, that the riddles<br>were ever meant to be answered?"</span><br><br>
+  Twelve years old, and the playhouse said he had<br>the clearest treble heard in twenty years —<br><br>a voice the world's cruelty had somehow failed<br>to make ugly, because his mother had gotten to it<br>first, and made it lovely instead.`},
+ {art:'playhouse', mood:'opera', branch:'maiden', voice:'turanpor', vo:'ch1_11_turanpor_maiden',
+  line:`If you must have my answer, then hear it sung, for I will not say it twice.`,
+  html:`<span class="aria">"If you must have my answer, then hear it sung —<br>for I will not say it twice."</span><br><br>
+  Twelve years old, and the playhouse said he had<br>the clearest treble heard in twenty years —<br><br>a voice the world's cruelty had somehow failed<br>to make ugly, because his mother had gotten to it<br>first, and made it lovely instead.`},
+ {art:'playhouse', mood:'opera', branch:'ghost', voice:'turanpor', vo:'ch1_11_turanpor_ghost',
+  line:`I left one debt unpaid beneath the same sky, and I have come back up for it.`,
+  html:`<span class="aria">"I left one debt unpaid beneath the same sky,<br>and I have come back up for it."</span><br><br>
+  His mother shivered, and laughed, and made him<br>do it twice. The clearest treble in twenty years —<br><br>a voice the world's cruelty had somehow failed<br>to make ugly, because his mother had gotten to it<br>first, and made it lovely instead.`},
+ {art:'herbs', mood:'herb', voice:'baizhi', vo:'ch1_12_baizhi',
+  line:`Trouble.`,
+  html:`And they were not quite only two.<br><br>
+  The pleasure-quarter kept its own physician of a<br>sort — a girl barely two and a half years older,<br>self-taught from dead apothecaries' notebooks,<br>tending what no respectable doctor would touch.<br><br>
+  <b>Baizhi</b> — white angelica, the pale root<br>that draws out pain.<br><br>
+  He called her <em>jiejie</em>.<br>She called him <span class="bzv">trouble</span>,<br>and meant it the way other people mean <em>darling</em>.`},
+ {art:'herbs', mood:'herb', html:`She had given herself a second name, the way<br>Daoists and cultivators do — a name you choose<br>instead of one you are handed.<br><br>
+  <span class="bzv glow">Danxin. Elixir-heart.</span><br><br>
+  She said it was only because cinnabar was the first<br>medicine she ever ground. He thought it was the<br>other meaning — <em>the loyal heart that stays</em> —<br>but he never said so.<br><br>With Baizhi, you let her keep her reasons.`},
+ {art:'coldcity', mood:'stage', html:`So when the <b>Double Ninth</b> came around the year<br>he turned twelve, and the playhouse mounted<br><em>Turandot</em> for the festival,<br><br>there was never any question<br>who would sing the princess.`},
+ {art:'dressing', mood:'stage', html:`The ninth day of the ninth month — the doubled-yang<br>day, the brightest number folded over on itself.<br><br>
+  They dressed him in the ice-princess's white and<br>silver. Elisabeth did it herself, by touch — each pin,<br>each fold — her fingers telling her what her eyes<br>could not:<br><br>
+  that her son, the son of Turan, was about to walk<br>out and become the <em>daughter</em> of Turan, and break<br>a roomful of people open with a voice she had<br>built with her own two hands.`},
+ {art:'dressing', mood:'stage', voice:'baizhi', vo:'ch1_17_baizhi',
+  line:`Breathe. And stop chewing your lip. A princess does not go on stage looking gnawed.`,
+  html:`Baizhi knelt at his feet through all of it —<br>a bitter draught for his nerves, a second pot<br>for his throat, and a steady scolding:<br><br>
+  <span class="bzv glow">"Breathe. And stop chewing your lip —<br>a princess does not go on stage looking gnawed."</span><br><br>
+  And once, when she thought he wasn't looking,<br>she straightened the silver at his collar with a<br>tenderness she would have denied<br>to her dying breath.`},
+ {art:'deja', mood:'frost', html:`For just a moment, with the silver headdress<br>settling cool against his brow, the boy felt<br>something he had no name for.<br><br>
+  <span class="aria glow">A shiver of having stood exactly here before —<br>in exactly this cold, in exactly this light —<br>a long, long time ago.</span><br><br>
+  It passed through him like a draft through a door.<br>He was twelve years old.<br>He did not chase it.`},
+ {art:'wings', mood:'stage', voice:'elisabeth', vo:'ch1_19_elisabeth',
+  line:`There's my talker.`,
+  html:`<span class="warmv glow-w">"There's my talker,"</span> his mother whispered,<br>and kissed his forehead.<br><br>
+  Baizhi said nothing at all — only gripped his<br>shoulder once, hard, the way you grip a soldier's<br>before a long march, and let go.<br><br>
+  Between the two of them they turned him toward<br>the wings — the same wings where, a lifetime and<br>a season ago, a man from the North had stood<br>and read a prince to life in the dark.`},
+ {art:'wings', mood:'hush', breath:true, html:`Out past the curtain the lanterns were going up:<br>ten thousand small fires against the<br>doubled-yang night.<br><br>
+  The musicians found their first note.<br><br>The house went quiet,<br><em>exactly the way she had always promised him<br>it would.</em><br><br>
+  <button class="breathbtn" onclick="takeBreath(this)">T A K E&#8201;&#8201;T H E&#8201;&#8201;B R E A T H</button>`},
+ {art:'light', mood:'finale', html:`And Turanpor took a breath,<br><br>and stepped toward the light.`},
+ {art:'light', mood:'end', end:true, html:`<span class="title-h">S A M E&#8201;&#8201;S K Y</span><br>
+   <span class="small">end of chapter one</span><br><br>
+   <span class="small" id="routeNote"></span>
+   <div class="endbtns"><button onclick="restart()">⟲ again</button><button onclick="location.href='SAME_SKY_Chapter_0.html'">↞ the prelude</button></div>`}
+];
+
+/* ============ BUILD DOM ============ */
+const story=document.getElementById('story');
+let route = localStorage.getItem('ss_ch1_part') || null;
+function build(){
+ story.innerHTML='';
+ BEATS.forEach((b,i)=>{
+  if(b.branch && b.branch!==route) return;
+  const s=document.createElement('section'); s.dataset.mood=b.mood; s.dataset.i=i;
+  const bg=document.createElement('div'); bg.className='bg'; bg.appendChild(svgEl(G[b.art]())); s.appendChild(bg);
+  if(b.choice){
+   const c=document.createElement('div'); c.className='choice';
+   c.innerHTML=`<div class="q">${b.choice.q}</div>`;
+   [b.choice.a,b.choice.b,b.choice.c].filter(Boolean).forEach(opt=>{
+    const btn=document.createElement('button'); btn.textContent=opt.t;
+    btn.onclick=()=>{ route=opt.flag; localStorage.setItem('ss_ch1_part',route); sting('choice'); flash(.5); build();
+      setTimeout(()=>{ document.querySelector(`section[data-i="${i}"]`)?.scrollIntoView(); window.scrollBy(0, innerHeight*0.9); },60); };
+    c.appendChild(btn);
+   });
+   s.appendChild(c);
+  } else {
+   const t=document.createElement('div'); t.className='txt'; t.innerHTML=b.html; s.appendChild(t);
+  }
+  story.appendChild(s);
+ });
+ const note=document.getElementById('routeNote');
+ if(note) note.textContent = route ? ({villain:'the sky remembers: silk over a knife.',maiden:'the sky remembers: he would not say it twice.',ghost:'the sky remembers: one debt, unpaid, beneath the same sky.'})[route] : '';
+ observeAll();
+}
+
+/* ============ SCROLL FX ============ */
+let observer;
+function observeAll(){
+ observer && observer.disconnect();
+ observer=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('lit'); onEnter(e.target); } });
+ },{threshold:.45});
+ document.querySelectorAll('section').forEach(s=>observer.observe(s));
+}
+function onEnter(s){
+ const m=s.dataset.mood;
+ document.getElementById('coldveil').style.opacity=(m==='frost')?0.85:0;
+ document.getElementById('darkveil').style.opacity=(m==='dark')?0.8:0;
+ music.mood(m);
+ const b=BEATS[+s.dataset.i]||{};
+ if(b.sting) sting(b.sting);
+ if(b.flash) flash(.85);
+ if(b.voice && !b._spoken){ b._spoken=true; setTimeout(()=>voice.say(b),700); }
+}
+function flash(op){ const f=document.getElementById('flash'); f.style.transition='none'; f.style.opacity=op;
+ requestAnimationFrame(()=>{ f.style.transition='opacity 1.2s'; f.style.opacity=0; }); }
+function takeBreath(btn){
+ btn.style.opacity=0; btn.disabled=true;
+ music.swell(); flash(.95);
+ setTimeout(()=>{ document.querySelectorAll('section')[ [...document.querySelectorAll('section')].indexOf(btn.closest('section'))+1 ]?.scrollIntoView({behavior:'smooth'}); },900);
+}
+// parallax
+let ticking=false;
+addEventListener('scroll',()=>{
+ if(ticking) return; ticking=true;
+ requestAnimationFrame(()=>{
+  const h=document.body.scrollHeight-innerHeight;
+  document.getElementById('hud').style.width=(scrollY/h*100)+'%';
+  document.querySelectorAll('section').forEach(s=>{
+   const r=s.getBoundingClientRect();
+   if(r.bottom<0||r.top>innerHeight) return;
+   const p=(r.top)/innerHeight;
+   s.querySelector('.bg').style.transform=`translateY(${p*60}px) scale(1.06)`;
+  });
+  ticking=false;
+ });
+},{passive:true});
+
+/* ============ VOICE LAYER ============ */
+/* Tier 1: VibeVoice audio files in webtoon/vo/ — drop in <stem>.wav or .mp3 and they play automatically.
+   Tier 2: synthesized character murmurs (speech-contour blips, one timbre per speaker). */
+const VOICES={
+ elisabeth:{base:294, type:'sine',    rate:175, fall:0.94, vib:5.5, vol:.16},  // warm, low, unhurried
+ baizhi:   {base:392, type:'square',  rate:110, fall:0.985,vib:0,   vol:.07},  // brisk, clipped
+ turanpor: {base:523, type:'triangle',rate:150, fall:0.97, vib:6.5, vol:.13}   // clear treble
+};
+const voice={
+ say(b){
+  if(document.getElementById('voiceless')?.checked) return;
+  const stem=b.vo;
+  if(stem){
+   const tryPlay=(ext,next)=>{ const a=new Audio('vo/'+stem+ext); a.volume=.9;
+     a.onerror=next; a.oncanplaythrough=()=>{ a.play().catch(()=>this.murmur(b)); badge('voice: '+stem+ext); };
+     a.load(); };
+   tryPlay('.wav',()=>tryPlay('.mp3',()=>{ this.murmur(b); }));
+  } else this.murmur(b);
+ },
+ murmur(b){
+  if(!music.ctx) return;
+  const v=VOICES[b.voice]; if(!v||!b.line) return;
+  badge('voice murmur: '+b.voice);
+  const words=b.line.replace(/[^\w\s'?]/g,'').split(/\s+/).filter(Boolean);
+  const c=music.ctx; let t=c.currentTime+.05;
+  const syl=w=>Math.max(1,Math.ceil(w.length/3));
+  const qEnd=b.line.trim().endsWith('?');
+  let f=v.base;
+  words.forEach((w,wi)=>{
+   const n=syl(w);
+   for(let s=0;s<n;s++){
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=v.type;
+    // sentence contour: drift down, rise at the end for questions
+    const pos=wi/words.length;
+    let freq=f*(1+((w.charCodeAt(s%w.length)%7)-3)*0.022);
+    if(qEnd&&pos>0.8) freq*=1.18;
+    o.frequency.setValueAtTime(freq,t);
+    o.frequency.exponentialRampToValueAtTime(freq*0.96,t+v.rate/1000*.8);
+    if(v.vib){ const vb=c.createOscillator(),vg=c.createGain(); vb.frequency.value=v.vib; vg.gain.value=3;
+     vb.connect(vg); vg.connect(o.frequency); vb.start(t); vb.stop(t+v.rate/1000); }
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(v.vol,t+0.018);
+    g.gain.exponentialRampToValueAtTime(.0001,t+v.rate/1000*.95);
+    o.connect(g); g.connect(music.voicebus);
+    o.start(t); o.stop(t+v.rate/1000);
+    t+=v.rate/1000;
+   }
+   f*=v.fall===0.985?1:(v.fall+(wi%3)*0.012);
+   t+=(w.endsWith(',')?0.22:0.05)+(v.rate/1000)*0.3;
+  });
+ }
+};
+let badgeT=null;
+function badge(s){ const el=document.getElementById('vobadge'); el.textContent=s;
+ clearTimeout(badgeT); badgeT=setTimeout(()=>el.textContent='',2600); }
+
+/* ============ MUSIC (synthesized — nothing copyrighted) ============ */
+const music={ctx:null,master:null,voicebus:null,cur:'',
+ start(){ this.ctx=new (window.AudioContext||window.webkitAudioContext)();
+  this.master=this.ctx.createGain(); this.master.gain.value=.5; this.master.connect(this.ctx.destination);
+  // gentle space: feedback delay shared by plucks + voice
+  this.delay=this.ctx.createDelay(); this.delay.delayTime.value=.31;
+  this.fb=this.ctx.createGain(); this.fb.gain.value=.32;
+  this.wet=this.ctx.createGain(); this.wet.gain.value=.25;
+  this.delay.connect(this.fb); this.fb.connect(this.delay); this.delay.connect(this.wet); this.wet.connect(this.master);
+  this.voicebus=this.ctx.createGain(); this.voicebus.gain.value=1; this.voicebus.connect(this.master); this.voicebus.connect(this.delay);
+  this.drone(); this.pluckLoop(); },
+ drone(){ const c=this.ctx; this.dg=c.createGain(); this.dg.gain.value=.05; this.dg.connect(this.master);
+  this.dOsc=[55,55.7,110.3].map(f=>{ const o=c.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(this.dg); o.start(); return o; }); },
+ // pentatonic palettes per mood — konghou-flavored
+ scaleFor(m){ return (m==='dark')?[220,246.9,293.7,329.6,392]:
+   (m==='frost'||m==='hush')?[261.6,311.1,349.2,415.3,523.3]:
+   (m==='herb')?[233,261.6,311.1,392,466.2]:
+   (m==='finale'||m==='end')?[261.6,329.6,392,523.3,659.3]:
+   [233,261.6,311.1,349.2,415.3]; },
+ pluck(f,vol){ const c=this.ctx,t=c.currentTime;
+  // doubled detuned strings = konghou shimmer
+  [0,1.004].forEach(d=>{ const o=c.createOscillator(),g=c.createGain();
+   o.type='triangle'; o.frequency.setValueAtTime(f*d||f,t); o.frequency.exponentialRampToValueAtTime((f*d||f)*0.995,t+2);
+   g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+2.4);
+   o.connect(g); g.connect(this.master); g.connect(this.delay); o.start(t); o.stop(t+2.5); }); },
+ pluckLoop(){ const step=()=>{ if(this.cur&&this.cur!=='still'){
+    const sc=this.scaleFor(this.cur); this.pluck(sc[Math.floor(Math.random()*sc.length)]/(Math.random()<.3?2:1), .06); }
+   const slow=(this.cur==='lull'||this.cur==='end'||this.cur==='frost'||this.cur==='hush');
+   setTimeout(step, (slow?1700:950)+Math.random()*900); }; step(); },
+ mood(m){ if(!this.ctx||m===this.cur) return; this.cur=m;
+  const t=this.ctx.currentTime;
+  const dark=(m==='dark');
+  const bright=(m==='finale'||m==='end');
+  this.dOsc.forEach((o,i)=>o.frequency.linearRampToValueAtTime(
+    dark?[41.2,41.7,82.9][i]:bright?[65.4,65.9,131.2][i]:[55,55.7,110.3][i], t+2));
+  this.dg.gain.linearRampToValueAtTime(dark?.09:bright?.07:.05,t+2); },
+ swell(){ if(!this.ctx) return; const c=this.ctx,t=c.currentTime;
+  this.dg.gain.linearRampToValueAtTime(.16,t+1.2); this.dg.gain.linearRampToValueAtTime(.06,t+4);
+  [261.6,329.6,392,523.3,659.3,784].forEach((f,i)=>setTimeout(()=>this.pluck(f,.16),i*170)); }
+};
+function sting(kind){ if(!music.ctx) return; const c=music.ctx,t=c.currentTime;
+ if(kind==='wood'){ const o=c.createOscillator(),g=c.createGain(); o.type='square'; o.frequency.value=1100;
+  g.gain.setValueAtTime(.35,t); g.gain.exponentialRampToValueAtTime(.001,t+.09);
+  o.connect(g); g.connect(music.master); o.start(t); o.stop(t+.1); }
+ if(kind==='choice'){ [392,523.3,659.3].forEach((f,i)=>setTimeout(()=>music.pluck(f,.18),i*140)); }
+}
+
+/* ============ GATE ============ */
+document.getElementById('begin').onclick=()=>{
+ music.start();
+ const g=document.getElementById('gate'); g.style.opacity=0;
+ setTimeout(()=>g.remove(),1500);
+ sting('wood');
+};
+function restart(){ scrollTo({top:0}); }
+build();
+</script>
+</body>
+</html>
